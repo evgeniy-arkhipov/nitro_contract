@@ -1,8 +1,11 @@
 const {
   MONGO_URI = 'mongodb://n0cte:19523@ds113915.mlab.com:13915/crowdapi',
   HOST_URI = 'localhost:8080',
-  BITCORE_RPC = 'https://testnet.blockexplorer.com/api',
+
+  BTC_COMPANY_ADDRESS = '1GwV7fPX97hmavc6iNrUZUogmjpLPrPFoE',
+  BITCORE_RPC = 'https://testnet.blockexplorer.com',
   ETHEREUM_RPC = 'https://ropsten.infura.io/UoiDPLlaAoM5GmpK8aR3',
+  
   NODE_ENV = 'development'
 } = process.env;
 
@@ -13,5 +16,7 @@ module.exports = {
   mongoUri: MONGO_URI,
   
   bitcoinRpc: BITCORE_RPC,
-  ethereumRpc: ETHEREUM_RPC
+  ethereumRpc: ETHEREUM_RPC,
+
+  btcCompanyAddr: BTC_COMPANY_ADDRESS
 }

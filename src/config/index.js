@@ -2,7 +2,7 @@ const {
   MONGO_URI = 'mongodb://n0cte:19523@ds113915.mlab.com:13915/crowdapi',
   HOST_URI = 'localhost:8080',
 
-  BTC_COMPANY_ADDRESS = '1GwV7fPX97hmavc6iNrUZUogmjpLPrPFoE',
+  BTC_COMPANY_ADDRESS = 'mpMHGvoDmnEBaSW3JXZQB7sgatV8YkJDFU',
   BITCORE_RPC = 'https://testnet.blockexplorer.com',
   ETHEREUM_RPC = 'https://ropsten.infura.io/UoiDPLlaAoM5GmpK8aR3',
   

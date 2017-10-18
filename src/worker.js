@@ -16,8 +16,10 @@ queue.process('tx', 10, (job, done) => {
         if(opReturnRegexp.test(text)){
           const hex = text.match(opReturnRegexp)[1];
           const ethAddr = new Buffer(hex, 'hex').toString('ascii')
+          console.log(ethAddr);
+          //ToDo: send NOX
         }
-      })
+      });
       done();
     })
     .catch(console.log);

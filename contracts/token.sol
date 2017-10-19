@@ -241,7 +241,7 @@ contract VToken is Token {
     
     using SafeMath for uint;
     
-    uint public limit = 100 ether;
+    uint public limit = 4 ether;
     
     mapping (address => uint256) fBalances;
     mapping (address => bool) public verified;
@@ -254,6 +254,11 @@ contract VToken is Token {
         return verified[_addr];
     }
     
+    function setLimit(uint _ethLimit) onlyOwner public returns (uint) {
+      limit = _ethLimit * 1 ether;
+      return limit;
+    }
+
     function transfering(address _sender, uint _value) private returns (uint tokens) {
         tokens = _value.div(price);
         
@@ -285,4 +290,3 @@ contract VToken is Token {
         tokens = transfering(_to, _eth.mul(1 ether));
     }
 }
-

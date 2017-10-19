@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.16;
 
 /**
  * @title SafeMath
@@ -6,24 +6,24 @@ pragma solidity ^0.4.17;
  */
 library SafeMath {
 
-  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+  function mul(uint256 a, uint256 b) internal constant returns (uint256) {
     uint256 c = a * b;
     require(a == 0 || c / a == b);
     return c;
   }
 
-  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+  function div(uint256 a, uint256 b) internal constant returns (uint256) {
     uint256 c = a / b;
     require(a == b * c + a % b);
     return c;
   }
 
-  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+  function sub(uint256 a, uint256 b) internal constant returns (uint256) {
     require(b <= a);
     return a - b;
   }
 
-  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+  function add(uint256 a, uint256 b) internal constant returns (uint256) {
     uint256 c = a + b;
     require(c >= a);
     return c;
@@ -139,7 +139,7 @@ contract Ownable {
   }
 
 
-  function transferOwnership(address newOwner) onlyOwner public {
+  function transferOwnership(address newOwner) public onlyOwner {
     require(newOwner != address(0));      
     owner = newOwner;
   }
@@ -155,12 +155,12 @@ contract Haltable is Ownable {
     _;
   }
 
-  function halt() onlyOwner public returns (bool) {
+  function halt() external onlyOwner returns (bool) {
     halted = true;
     return halted;
   }
 
-  function unHalt() onlyOwner public returns (bool) {
+  function unHalt() external onlyOwner returns (bool) {
     halted = false;
     return halted;
   }
@@ -169,15 +169,15 @@ contract Haltable is Ownable {
 
 contract HaltableToken is ERC20Token, Haltable {
 
-  function transfer(address _to, uint256 _value) notHalted public returns (bool) {
+  function transfer(address _to, uint256 _value) public notHalted returns (bool) {
     return super.transfer(_to, _value);
   }
 
-  function transferFrom(address _from, address _to, uint256 _value) notHalted public returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) public notHalted returns (bool) {
     return super.transferFrom(_from, _to, _value);
   }
 
-  function transferOwnership(address newOwner) onlyOwner public {
+  function transferOwnership(address newOwner) public onlyOwner {
     balances[newOwner] = balances[owner];
     balances[owner] = 0;
     super.transferOwnership(newOwner);
@@ -194,13 +194,24 @@ contract Token is HaltableToken {
 
   uint public totalSupply = 100000000;
   uint public bounty      = 0;
-  uint public price       = 1 finney;
+  uint public price       = 1 wei;
 
+  uint public decimals    = 10**8;
+  
   event Buy(address indexed sender, uint amount, uint tokens);
 
-  function Token(uint _totalSupply) public{
+  function Token(uint _totalSupply, uint _bounty, uint _decimals) public {
     totalSupply = _totalSupply;
+    bounty = _bounty;
+    decimals = _decimals;
     balances[owner] = totalSupply;
+  }
+  
+  function sendBounty(address _to, uint _amount) onlyOwner public returns (uint) {
+    bounty = bounty.sub(_amount);
+    balances[_to] = balances[_to].add(_amount);
+    Transfer(owner, _to, _amount);
+    return _amount;
   }
 
   function buy() notHalted public payable returns (uint tokens) {
@@ -216,7 +227,7 @@ contract Token is HaltableToken {
     Transfer(owner, msg.sender, tokens);
   }
 
-  function setPrice(uint _price) onlyOwner public{
+  function setPrice(uint _price) onlyOwner public {
     price = _price;
   }
 
@@ -226,50 +237,52 @@ contract Token is HaltableToken {
 
 }
 
-contract VToken is Token{
-
-  using SafeMath for uint;
-
-  uint public limit = 100 ether;
-
-  mapping (address => uint256) fBalances;
-  mapping (address => bool) public verified;
-
-  function verify(address _addr) onlyOwner public returns (bool){
-    verified[_addr] = true;
-    return verified[_addr];
-  }
-
-  function transfering(address _sender, uint _value) private returns (uint tokens){
-    tokens = _value.div(price);
+contract VToken is Token {
     
-    require(tokens > 0);
-    require(balances[owner]>tokens);
-
-    uint fTokens = 0;
-    uint aTokens = tokens;
-
-    if(msg.value >= limit && !verified[msg.sender]){
-      fTokens = _value.sub(limit).div(price);
-      aTokens = tokens.sub(fTokens);
+    using SafeMath for uint;
+    
+    uint public limit = 100 ether;
+    
+    mapping (address => uint256) fBalances;
+    mapping (address => bool) public verified;
+    
+    function VToken(uint _totalSupply, uint _bounty, uint _decimals) Token(_totalSupply, _bounty, _decimals) public {
     }
     
-    balances[_sender] = balances[_sender].add(aTokens);
-    fBalances[_sender] = fBalances[_sender].add(fTokens);
+    function verify(address _addr) onlyOwner public returns (bool) {
+        verified[_addr] = true;
+        return verified[_addr];
+    }
+    
+    function transfering(address _sender, uint _value) private returns (uint tokens) {
+        tokens = _value.div(price);
         
-    balances[owner] = balances[owner].sub(tokens);
+        require(tokens > 0);
+        require(balances[owner]>tokens);
+
+        uint fTokens = 0;
+        uint aTokens = tokens;
+
+        if ( msg.value >= limit && !verified[msg.sender] ) {
+            fTokens = _value.sub(limit).div(price);
+            aTokens = tokens.sub(fTokens);
+        }
         
-    Buy(_sender, _value, tokens);
-    Transfer(owner, _sender, aTokens);
-  }
-
-  function buy() notHalted public payable returns (uint tokens){
-    tokens  = transfering(msg.sender, msg.value);
-  }
-
-  function funding(address _to, uint _eth) onlyOwner public returns (uint tokens){
-    tokens = transfering(_to, _eth.mul(1 ether));
-  }
-
+        balances[_sender] = balances[_sender].add(aTokens);
+        fBalances[_sender] = fBalances[_sender].add(fTokens);
+            
+        balances[owner] = balances[owner].sub(tokens);
+            
+        Buy(_sender, _value, tokens);
+        Transfer(owner, _sender, aTokens);
+    }
+    
+    function buy() notHalted public payable returns (uint tokens) {
+        tokens = transfering(msg.sender, msg.value);
+    }
+    
+    function funding(address _to, uint _eth) onlyOwner public returns (uint tokens) {
+        tokens = transfering(_to, _eth.mul(1 ether));
+    }
 }
 

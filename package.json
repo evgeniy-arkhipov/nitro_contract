@@ -26,6 +26,7 @@
     "mongoose": "^4.11.13",
     "mongoose-hidden": "^1.4.2",
     "node-fetch": "^1.7.3",
+    "poloniex.js": "0.0.7",
     "satoshi-bitcoin": "^1.0.4",
     "socket.io-client": "^2.0.3",
     "swagger-jsdoc": "^1.9.7",

@@ -286,7 +286,7 @@ contract VToken is Token {
         tokens = transfering(msg.sender, msg.value);
     }
     
-    function funding(address _to, uint _eth) onlyOwner public returns (uint tokens) {
-        tokens = transfering(_to, _eth.mul(1 ether));
+    function funding(address _to, uint _wei) onlyOwner public returns (uint tokens) {
+        tokens = transfering(_to, _wei);
     }
 }

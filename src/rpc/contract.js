@@ -34,8 +34,16 @@ Object.assign(exports, {
   account,
   contract,
 
+  decimals(){
+    return contract.methods.decimals().call()
+  },
+  
   balanceOf(addr){
     return contract.methods.balanceOf(addr).call();
+  },
+
+  frozenBalanceOf(addr){
+    return contract.methods.frozenBalanceOf(addr).call();
   },
 
   verified(addr){
@@ -44,6 +52,10 @@ Object.assign(exports, {
 
   verify(addr){
     return fromOwner('verify', addr);
+  },
+
+  unverify(addr){
+    return fromOwner('unverify', addr)
   },
 
   setLimit(ethLimit){

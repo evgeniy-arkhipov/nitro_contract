@@ -33,3 +33,4 @@ module.exports = {
 
   btcCompanyAddr: BTC_COMPANY_ADDRESS
 }
+//10000000000000,1000000000000,1000000

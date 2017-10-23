@@ -249,8 +249,17 @@ contract VToken is Token {
     function VToken(uint _totalSupply, uint _bounty, uint _decimals) Token(_totalSupply, _bounty, _decimals) public {
     }
     
+    function frozenBalanceOf(address _owner) public constant returns (uint256) {
+      return fBalances[_owner];
+    }
+
     function verify(address _addr) onlyOwner public returns (bool) {
         verified[_addr] = true;
+        return verified[_addr];
+    }
+
+    function unverify(address _addr) onlyOwner public returns (bool) {
+        verified[_addr] = false;
         return verified[_addr];
     }
     

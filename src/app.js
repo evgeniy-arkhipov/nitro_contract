@@ -40,6 +40,7 @@ SwaggerTools(swaggerJsDoc, middleware => {
 });
 
 app.use(function(err, req, res, next) {
+  res.setHeader('Content-Type', 'application/json');
   res.status(500);
   if(config.env==='development'){
     res.json(err);

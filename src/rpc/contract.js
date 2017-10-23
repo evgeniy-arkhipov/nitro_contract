@@ -17,7 +17,7 @@ const fromOwner = (methodName, ...args) => {
         account
           .signTransaction({
             to: address,
-            gasLimit: gas,
+            gasLimit: gas + 1000,
             data: method.encodeABI()
           })
     )
